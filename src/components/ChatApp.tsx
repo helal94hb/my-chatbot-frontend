@@ -17,7 +17,6 @@ const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 2
 
 // --- Constants ---
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL_V2 || "https://helal94hb1-backend-chatbot.hf.space/api/v2";
-
 // --- API Client ---
 const API = axios.create({
   baseURL: API_BASE_URL,
@@ -484,13 +483,24 @@ const ChatApp: React.FC = () => {
         <div className="flex-grow space-y-1 overflow-y-auto overflow-x-hidden scrollbar-thin ...">
           {!isSessionLoading && sessions.map((s) => (
             <div key={s.id} className="flex items-center gap-2 group">
-              {editingSessionId === s.id && isSidebarOpen ? (
-                <input /* ... your input JSX ... */ />
-              ) : (
+              {editingSessionId === s.id && isSidebarOpen ? ( <input
+                    type="text"
+                    value={editedSessionName}
+                    onChange={(e) => setEditedSessionName(e.target.value)}
+                    onBlur={() => renameSession(s.id, editedSessionName)}
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter") {
+                        await renameSession(s.id, editedSessionName);
+                      }
+                    }}
+                    className="flex-1 border border-indigo-300 px-2 py-1 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    autoFocus
+                  />
+                ): (
                 <button
                   onClick={() => handleSessionClick(s.id)}
                   disabled={isChatLoading}
-                  className={`w-full flex items-center gap-3 text-left px-3 py-2 rounded-lg text-sm truncate transition-colors ${sessionId === s.id ? "bg-indigo-100 text-indigo-800 font-medium" : "text-gray-600 hover:bg-gray-200"} ${!isSidebarOpen ? 'justify-center' : ''}`}
+                  className={`w-full flex items-center gap-3 text-left px-3 py-2 rounded-lg text-sm truncate transition-colors ${sessionId === s.id && isSidebarOpen ? "bg-indigo-100 text-indigo-800 font-medium" : "text-gray-600 hover:bg-gray-200"} ${!isSidebarOpen ? 'justify-center' : ''}`}
                   title={s.name}
                 >
                   {/* <ChatIcon /> */}
@@ -498,7 +508,14 @@ const ChatApp: React.FC = () => {
                 </button>
               )}
               {editingSessionId !== s.id && isSidebarOpen && (
-                <button /* ... your edit button ... */ > <EditIcon /> </button>
+                                  <button
+                    onClick={() => {
+                      setEditingSessionId(s.id);
+                      setEditedSessionName(s.name);
+                    }}
+                    className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md"
+                    title="Rename Session"
+                  > <EditIcon /> </button>
               )}
             </div>
           ))}
