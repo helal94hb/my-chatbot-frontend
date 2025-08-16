@@ -9,6 +9,11 @@ import remarkGfm from 'remark-gfm';
 import Header from "./Header";
 import companyLogo from "./assets/logo.png"
 
+// Simple placeholder icons for the sidebar
+const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" /></svg>;
+const ChatIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm14 1a1 1 0 10-2 0v1h-2V6a1 1 0 10-2 0v1H8V6a1 1 0 10-2 0v1H4v3h12V6z" /></svg>;
+const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" /><path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" /></svg>;
+
 
 // --- Constants ---
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL_V2 || "https://helal94hb1-backend-chatbot.hf.space/api/v2";
@@ -250,9 +255,16 @@ const ChatApp: React.FC = () => {
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editedSessionName, setEditedSessionName] = useState<string>("");
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
 
-  // --- 3. CREATE THE LOGOUT FUNCTION ---
+  // CREATE THE TOGGLE FUNCTION
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+  
+
+  // CREATE THE LOGOUT FUNCTION
   const handleLogout = () => {
     logger.info("User logging out.");
     localStorage.removeItem('userToken'); // Clear the session token
@@ -450,91 +462,62 @@ const ChatApp: React.FC = () => {
   // --- JSX Structure ---
   return (
     <div className="min-h-screen h-screen flex bg-gray-100 font-sans text-sm">
-      {/* Sidebar */}
-            {/* Sidebar */}
-      <div className="w-64 p-4 bg-[#f4f7f9] border-r shadow-lg flex flex-col flex-shrink-0 h-full">
-        {/* Session list UI */}
+         <div className={`flex flex-col bg-[#f4f7f9] border-r shadow-lg transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
+      <div className="p-4 flex flex-col h-full">
         <img
           src={companyLogo}
           alt="Company Logo"
-          className="h-8 mb-3 object-contain"
+          // --- KEY CHANGE: Center logo when collapsed ---
+          className={`object-contain mb-3 transition-all duration-300 ${isSidebarOpen ? 'h-8 self-start' : 'h-10 self-center'}`}
         />
-      <button
-        onClick={createSession}
-        disabled={isLoading || isSessionLoading}
-        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm px-3 py-2 rounded-lg mb-3 font-bold font-inter
-                  shadow-lg shadow-grey-500/50
-                  transition-all duration-200 ease-in-out
-                  hover:shadow-xl hover:-translate-y-0.5
-                  disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
-      >
-        New Chat
-      </button>
-        <div className="flex-grow space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded-full scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-track-[#f4f7f9] pr-1">
-        {/* <div className="flex-grow space-y-1 overflow-y-auto pr-1 -mr-1 custom-scrollbar"> */}
-          {isSessionLoading && (
-            <p className="text-xs text-gray-500 text-center py-2">
-              Loading sessions...
-            </p>
-          )}
-          {!isSessionLoading && sessions.length === 0 && (
-            <p className="text-xs text-gray-500 text-center py-2">
-              No sessions yet.
-            </p>
-          )}
-          {!isSessionLoading &&
-            sessions.map((s) => (
-              <div key={s.id} className="flex items-center gap-2 group">
-                {editingSessionId === s.id ? (
-                  <input
-                    type="text"
-                    value={editedSessionName}
-                    onChange={(e) => setEditedSessionName(e.target.value)}
-                    onBlur={() => renameSession(s.id, editedSessionName)}
-                    onKeyDown={async (e) => {
-                      if (e.key === "Enter") {
-                        await renameSession(s.id, editedSessionName);
-                      }
-                    }}
-                    className="flex-1 border border-indigo-300 px-2 py-1 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    autoFocus
-                  />
-                ) : (
-                  <button
-                    onClick={() => handleSessionClick(s.id)}
-                    disabled={isChatLoading}
-                    className={`flex-1 text-left px-3 py-2 rounded-lg text-sm truncate transition duration-150 ease-in-out ${s.id === sessionId ? "bg-indigo-100 text-indigo-800 font-medium" : "text-gray-600 hover:bg-gray-200"} ${isChatLoading ? "cursor-not-allowed opacity-70" : ""}`}
-                    title={s.name}
-                  >
-                    {s.name}
-                  </button>
-                )}
-                {editingSessionId !== s.id && (
-                  <button
-                    onClick={() => {
-                      setEditingSessionId(s.id);
-                      setEditedSessionName(s.name);
-                    }}
-                    className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md"
-                    title="Rename Session"
-                  >
-                    {/* --- ICON REPLACEMENT --- */}
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                      <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                      <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            ))}
+        <button
+          onClick={createSession}
+          disabled={isLoading || isSessionLoading}
+          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm px-3 py-2 rounded-lg mb-3 font-bold font-inter shadow-lg shadow-blue-500/50 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+          title="New Chat"
+        >
+          <PlusIcon />
+          {/* --- KEY CHANGE: Text is hidden when collapsed --- */}
+          <span className={`whitespace-nowrap ${!isSidebarOpen ? 'hidden' : ''}`}>New Chat</span>
+        </button>
+
+        <div className="flex-grow space-y-1 overflow-y-auto overflow-x-hidden scrollbar-thin ...">
+          {!isSessionLoading && sessions.map((s) => (
+            <div key={s.id} className="flex items-center gap-2 group">
+              {editingSessionId === s.id && isSidebarOpen ? (
+                <input /* ... your input JSX ... */ />
+              ) : (
+                <button
+                  onClick={() => handleSessionClick(s.id)}
+                  disabled={isChatLoading}
+                  className={`w-full flex items-center gap-3 text-left px-3 py-2 rounded-lg text-sm truncate transition-colors ${sessionId === s.id ? "bg-indigo-100 text-indigo-800 font-medium" : "text-gray-600 hover:bg-gray-200"} ${!isSidebarOpen ? 'justify-center' : ''}`}
+                  title={s.name}
+                >
+                  {/* <ChatIcon /> */}
+                  <span className={`flex-1 ${!isSidebarOpen ? 'hidden' : ''}`}>{s.name}</span>
+                </button>
+              )}
+              {editingSessionId !== s.id && isSidebarOpen && (
+                <button /* ... your edit button ... */ > <EditIcon /> </button>
+              )}
+            </div>
+          ))}
         </div>
       </div>
+    </div>
+     
+            {/* Sidebar */}
+  
 
       {/* Main Chat Area */}
               <div className="flex-1 flex flex-col h-full">
                 <div className="flex flex-col border-l rounded-none shadow-lg bg-white overflow-hidden flex-grow h-full">
                   {/* Chat Messages Area */}
-                  <Header onLogout={handleLogout}/>
+                            <Header 
+            isSidebarOpen={isSidebarOpen} 
+            toggleSidebar={toggleSidebar} 
+            onLogout={handleLogout} 
+          />
                             {!sessionId && !isSessionLoading && (<div className="flex items-center justify-center h-full">
                     <div className="text-center space-y-2">
                     <div className="text-center"> {/* Use text-center on a parent if you want them centered */}

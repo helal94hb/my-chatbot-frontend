@@ -2,10 +2,12 @@ import React from 'react';
 import type { FC } from 'react'; 
 import TransactLogo from "./assets/Transact_logo.png"
 interface HeaderProps {
-  onLogout: () => void; // Add the onLogout function to the interface
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void; // Add this prop
+  onLogout: () => void;
 }
 
-const Header: FC<HeaderProps> = ({ onLogout }) => {
+const Header: FC<HeaderProps> = ({ isSidebarOpen, toggleSidebar, onLogout }) => {
   return (
     
     <header 
@@ -14,6 +16,16 @@ const Header: FC<HeaderProps> = ({ onLogout }) => {
     >
       {/* Company Logo (stays on the left) */}
       <div className="flex items-center gap-4">
+          {/* --- ADD THE TOGGLE BUTTON HERE --- */}
+        <button 
+          onClick={toggleSidebar} 
+          className="text-white hover:bg-white/10 p-2 rounded-full transition-colors"
+          title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+          </svg>
+        </button>
       <img
         src={TransactLogo}
         alt="Company Logo"
