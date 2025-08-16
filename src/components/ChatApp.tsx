@@ -11,7 +11,7 @@ import companyLogo from "./assets/logo.png"
 
 
 // --- Constants ---
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL_V2 || "http://localhost:8000/api/v2";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL_V2 || "https://helal94hb1-backend-chatbot.hf.space/api/v2";
 
 // --- API Client ---
 const API = axios.create({
