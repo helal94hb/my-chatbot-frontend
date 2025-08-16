@@ -1,0 +1,28 @@
+@import "@fontsource/inter/400.css"; /* Regular */
+@import "@fontsource/inter/700.css"; /* Bold */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .animate-gradient-flow {
+    background-size: 200% 200%;
+    animation: gradient-flow 4s ease-in-out infinite;
+  }
+
+  @keyframes gradient-flow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+}
+
+body {
+  @apply text-gray-800;
+}
